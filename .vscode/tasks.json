@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Flutter Build Web (HTML Renderer)",
+			"type": "shell",
+			"command": "flutter build web --web-renderer html",
+			"group": "build",
+			"problemMatcher": [],
+			"isBackground": false
+		}
+	]
+}
