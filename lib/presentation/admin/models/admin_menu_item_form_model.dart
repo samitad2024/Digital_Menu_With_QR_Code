@@ -2,28 +2,25 @@ import '../../../domain/entities/menu_item.dart';
 
 class AdminMenuItemFormModel {
   String id;
-  String name;
-  String description;
-  double price;
-  String category;
+  String amharic;
+  String english;
+  String section;
   String imageUrl;
 
   AdminMenuItemFormModel({
     this.id = '',
-    this.name = '',
-    this.description = '',
-    this.price = 0.0,
-    this.category = '',
+    this.amharic = '',
+    this.english = '',
+    this.section = '',
     this.imageUrl = '',
   });
 
   factory AdminMenuItemFormModel.fromMenuItem(MenuItem item) {
     return AdminMenuItemFormModel(
       id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      category: item.category,
+      amharic: item.amharic,
+      english: item.english,
+      section: item.section,
       imageUrl: item.imageUrl,
     );
   }
@@ -31,10 +28,9 @@ class AdminMenuItemFormModel {
   MenuItem toMenuItem() {
     return MenuItem(
       id: id,
-      name: name,
-      description: description,
-      price: price,
-      category: category,
+      amharic: amharic,
+      english: english,
+      section: section,
       imageUrl: imageUrl,
     );
   }

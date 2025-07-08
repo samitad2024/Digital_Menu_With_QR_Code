@@ -237,8 +237,7 @@ class MenuSectionPage extends StatelessWidget {
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.attach_money,
-                                          color: Colors.white, size: 18),
+                                      
                                       Text(
                                         data['price'] ?? '',
                                         style: const TextStyle(

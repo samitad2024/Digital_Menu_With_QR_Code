@@ -3,27 +3,24 @@ import '../../domain/entities/menu_item.dart';
 class MenuItemModel extends MenuItem {
   MenuItemModel({
     required String id,
-    required String name,
-    required String description,
-    required double price,
-    required String category,
+    required String amharic,
+    required String english,
+    required String section,
     required String imageUrl,
   }) : super(
           id: id,
-          name: name,
-          description: description,
-          price: price,
-          category: category,
+          amharic: amharic,
+          english: english,
+          section: section,
           imageUrl: imageUrl,
         );
 
   factory MenuItemModel.fromMap(Map<String, dynamic> map) {
     return MenuItemModel(
       id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      description: map['description'] ?? '',
-      price: (map['price'] ?? 0).toDouble(),
-      category: map['category'] ?? '',
+      amharic: map['amharic'] ?? '',
+      english: map['english'] ?? '',
+      section: map['section'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
     );
   }
@@ -31,10 +28,9 @@ class MenuItemModel extends MenuItem {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
-      'price': price,
-      'category': category,
+      'amharic': amharic,
+      'english': english,
+      'section': section,
       'imageUrl': imageUrl,
     };
   }

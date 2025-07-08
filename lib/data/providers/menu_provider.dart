@@ -11,7 +11,6 @@ class MenuItem {
   final String id;
   final String amharic;
   final String english;
-  final String price;
   final String section;
   final String imageUrl;
 
@@ -19,7 +18,6 @@ class MenuItem {
     required this.id,
     required this.amharic,
     required this.english,
-    required this.price,
     required this.section,
     required this.imageUrl,
   });
@@ -30,7 +28,6 @@ class MenuItem {
       id: doc.id,
       amharic: data['amharic'] ?? '',
       english: data['english'] ?? '',
-      price: data['price'] ?? '',
       section: data['section'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
     );
@@ -40,7 +37,6 @@ class MenuItem {
     return {
       'amharic': amharic,
       'english': english,
-      'price': price,
       'section': section,
       'imageUrl': imageUrl,
     };

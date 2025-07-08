@@ -125,7 +125,6 @@ class _SectionCRUD extends StatelessWidget {
                                   child: const Icon(Icons.image, size: 24),
                                 ),
                           title: Text(item.amharic + ' / ' + item.english),
-                          subtitle: Text('Price (AED): ${item.price}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -159,7 +158,6 @@ class _SectionCRUD extends StatelessWidget {
       {MenuItem? item}) {
     final amharicController = TextEditingController(text: item?.amharic ?? '');
     final englishController = TextEditingController(text: item?.english ?? '');
-    final priceController = TextEditingController(text: item?.price ?? '');
     final imageUrl = item?.imageUrl ?? '';
     XFile? selectedImage;
     String? errorMsg;
@@ -258,12 +256,6 @@ class _SectionCRUD extends StatelessWidget {
                       controller: englishController,
                       decoration: const InputDecoration(labelText: 'English'),
                     ),
-                    TextField(
-                      controller: priceController,
-                      decoration:
-                          const InputDecoration(labelText: 'Price (AED)'),
-                      keyboardType: TextInputType.number,
-                    ),
                     if (uploadProgress != null && uploadProgress! < 1.0)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -280,8 +272,7 @@ class _SectionCRUD extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     if (amharicController.text.isEmpty ||
-                        englishController.text.isEmpty ||
-                        priceController.text.isEmpty) {
+                        englishController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('All fields are required!')));
                       return;
@@ -317,7 +308,6 @@ class _SectionCRUD extends StatelessWidget {
                       id: item?.id ?? '',
                       amharic: amharicController.text,
                       english: englishController.text,
-                      price: priceController.text,
                       section: section,
                       imageUrl: finalImageUrl,
                     );

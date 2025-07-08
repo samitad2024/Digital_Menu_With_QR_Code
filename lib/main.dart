@@ -6,6 +6,8 @@ import 'dependency_injection.dart' as di;
 import 'package:provider/provider.dart';
 import 'presentation/admin/controllers/admin_menu_controller.dart';
 import 'presentation/home/controllers/home_menu_controller.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +15,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   di.init();
-  runApp(const MyApp());
+  runApp(DevicePreview(
+    enabled: !kReleaseMode,
+    builder: (context) => const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -34,6 +39,8 @@ class MyApp extends StatelessWidget {
         ),
         onGenerateRoute: AppRouter.generateRoute,
         initialRoute: '/',
+        builder: DevicePreview.appBuilder,
+        locale: DevicePreview.locale(context),
       ),
     );
   }
