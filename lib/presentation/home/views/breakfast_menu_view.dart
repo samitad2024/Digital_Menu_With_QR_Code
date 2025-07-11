@@ -8,3 +8,5 @@ class BreakfastMenuView extends StatelessWidget {
     return const Center(child: Text('Breakfast Menu')); // Placeholder
   }
 }
+
+

@@ -115,8 +115,8 @@ class _SectionCRUD extends StatelessWidget {
                       final item = items[index];
                       return Card(
                         child: ListTile(
-                          leading: item.imageUrl.isNotEmpty
-                              ? Image.network(item.imageUrl,
+                          leading: item.imageurl.isNotEmpty
+                              ? Image.network(item.imageurl,
                                   width: 50, height: 50, fit: BoxFit.cover)
                               : Container(
                                   width: 50,
@@ -158,7 +158,9 @@ class _SectionCRUD extends StatelessWidget {
       {MenuItem? item}) {
     final amharicController = TextEditingController(text: item?.amharic ?? '');
     final englishController = TextEditingController(text: item?.english ?? '');
-    final imageUrl = item?.imageUrl ?? '';
+    final priceController =
+        TextEditingController(text: item != null ? item.price.toString() : '');
+    final imageurl = item?.imageurl ?? '';
     XFile? selectedImage;
     String? errorMsg;
     double? uploadProgress;
@@ -226,8 +228,8 @@ class _SectionCRUD extends StatelessWidget {
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover))
-                          : (imageUrl.isNotEmpty
-                              ? Image.network(imageUrl,
+                          : (imageurl.isNotEmpty
+                              ? Image.network(imageurl,
                                   width: 100, height: 100, fit: BoxFit.cover)
                               : Container(
                                   width: 100,
@@ -256,6 +258,12 @@ class _SectionCRUD extends StatelessWidget {
                       controller: englishController,
                       decoration: const InputDecoration(labelText: 'English'),
                     ),
+                    TextField(
+                      controller: priceController,
+                      decoration:
+                          const InputDecoration(labelText: 'Price (AED)'),
+                      keyboardType: TextInputType.number,
+                    ),
                     if (uploadProgress != null && uploadProgress! < 1.0)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -272,12 +280,13 @@ class _SectionCRUD extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     if (amharicController.text.isEmpty ||
-                        englishController.text.isEmpty) {
+                        englishController.text.isEmpty ||
+                        priceController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('All fields are required!')));
                       return;
                     }
-                    String finalImageUrl = imageUrl;
+                    String finalImageurl = imageurl;
                     if (selectedImage != null) {
                       setState(() {
                         uploadProgress = 0.0;
@@ -298,7 +307,7 @@ class _SectionCRUD extends StatelessWidget {
                         });
                         return;
                       }
-                      finalImageUrl = url;
+                      finalImageurl = url;
                       setState(() {
                         uploadProgress = null;
                         imageUploadSuccess = true;
@@ -308,8 +317,9 @@ class _SectionCRUD extends StatelessWidget {
                       id: item?.id ?? '',
                       amharic: amharicController.text,
                       english: englishController.text,
+                      price: double.tryParse(priceController.text) ?? 0.0,
                       section: section,
-                      imageUrl: finalImageUrl,
+                      imageurl: finalImageurl,
                     );
                     if (item == null) {
                       await provider.addMenuItem(newItem);

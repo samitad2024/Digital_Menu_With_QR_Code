@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -11,25 +9,29 @@ class MenuItem {
   final String id;
   final String amharic;
   final String english;
+  final double price;
   final String section;
-  final String imageUrl;
+  final String imageurl;
 
   MenuItem({
     required this.id,
     required this.amharic,
     required this.english,
+    required this.price,
     required this.section,
-    required this.imageUrl,
+    required this.imageurl,
   });
 
-  factory MenuItem.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory MenuItem.fromMap(Map<String, dynamic> data, String id) {
     return MenuItem(
-      id: doc.id,
+      id: id,
       amharic: data['amharic'] ?? '',
       english: data['english'] ?? '',
+      price: (data['price'] is num)
+          ? (data['price'] as num).toDouble()
+          : double.tryParse(data['price']?.toString() ?? '') ?? 0.0,
       section: data['section'] ?? '',
-      imageUrl: data['imageUrl'] ?? '',
+      imageurl: data['imageurl'] ?? '',
     );
   }
 
@@ -37,15 +39,15 @@ class MenuItem {
     return {
       'amharic': amharic,
       'english': english,
+      'price': price,
       'section': section,
-      'imageUrl': imageUrl,
+      'imageurl': imageurl,
     };
   }
 }
 
 class MenuProvider with ChangeNotifier {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final SupabaseClient _client = Supabase.instance.client;
   Map<String, List<MenuItem>> _itemsBySection = {};
   bool _loading = false;
   String? _error;
@@ -59,9 +61,11 @@ class MenuProvider with ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final snapshot = await _firestore.collection('menu').get();
-      final items =
-          snapshot.docs.map((doc) => MenuItem.fromFirestore(doc)).toList();
+      final response = await _client.from('menu').select();
+      final items = (response as List)
+          .map((data) =>
+              MenuItem.fromMap(data, data['id'] ?? data['uuid'] ?? ''))
+          .toList();
       _itemsBySection = {};
       for (var item in items) {
         _itemsBySection.putIfAbsent(item.section, () => []).add(item);
@@ -75,51 +79,25 @@ class MenuProvider with ChangeNotifier {
 
   Future<String?> uploadImage(dynamic fileOrXFile,
       {Function(double)? onProgress}) async {
-    debugPrint('uploadImage called with: ${fileOrXFile.runtimeType}');
+    debugPrint('uploadImage called with: \\${fileOrXFile.runtimeType}');
     try {
-      if (kIsWeb) {
-        // Web: fileOrXFile is XFile
-        final XFile xfile = fileOrXFile as XFile;
-        final bytes = await xfile.length();
-        if (bytes > 1024 * 1024) {
-          debugPrint('Image too large');
-          return 'Image must be less than 1MB';
-        }
-        final fileName =
-            '${DateTime.now().millisecondsSinceEpoch}_${xfile.name}';
-        final ref = _storage.ref().child('menu_images/$fileName');
-        final uploadTask = ref.putData(await xfile.readAsBytes());
-        uploadTask.snapshotEvents.listen((event) {
-          if (onProgress != null && event.totalBytes > 0) {
-            onProgress(event.bytesTransferred / event.totalBytes);
-          }
-        });
-        final snapshot = await uploadTask;
-        final url = await snapshot.ref.getDownloadURL();
-        debugPrint('Image uploaded! Download URL: $url');
-        return url;
-      } else {
-        // Mobile/Desktop: fileOrXFile is XFile
-        final XFile xfile = fileOrXFile as XFile;
-        final bytes = await xfile.length();
-        if (bytes > 1024 * 1024) {
-          debugPrint('Image too large');
-          return 'Image must be less than 1MB';
-        }
-        final fileName =
-            '${DateTime.now().millisecondsSinceEpoch}_${xfile.name}';
-        final ref = _storage.ref().child('menu_images/$fileName');
-        final uploadTask = ref.putFile(xFileToFile(xfile));
-        uploadTask.snapshotEvents.listen((event) {
-          if (onProgress != null && event.totalBytes > 0) {
-            onProgress(event.bytesTransferred / event.totalBytes);
-          }
-        });
-        final snapshot = await uploadTask;
-        final url = await snapshot.ref.getDownloadURL();
-        debugPrint('Image uploaded! Download URL: $url');
-        return url;
+      final XFile xfile = fileOrXFile as XFile;
+      final bytes = await xfile.length();
+      if (bytes > 1024 * 1024) {
+        debugPrint('Image too large');
+        return 'Image must be less than 1MB';
       }
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${xfile.name}';
+      final storageResponse =
+          await _client.storage.from('menu-images').uploadBinary(
+                fileName,
+                await xfile.readAsBytes(),
+                fileOptions: const FileOptions(upsert: true),
+              );
+      // Supabase uploadBinary returns a String path on success, or throws on error
+      final url = _client.storage.from('menu-images').getPublicUrl(fileName);
+      debugPrint('Image uploaded! Public URL: $url');
+      return url;
     } catch (e, stack) {
       debugPrint('Image upload failed: $e');
       debugPrint('Stack trace: $stack');
@@ -130,14 +108,13 @@ class MenuProvider with ChangeNotifier {
   }
 
   Future<void> addMenuItem(MenuItem item) async {
-    // Prevent adding item if imageUrl is null or empty
-    if (item.imageUrl.isEmpty) {
+    if (item.imageurl.isEmpty) {
       _error = 'Image is required to add an item.';
       notifyListeners();
       return;
     }
     try {
-      await _firestore.collection('menu').add(item.toMap());
+      await _client.from('menu').insert(item.toMap());
       await fetchMenu();
     } catch (e) {
       _error = 'Failed to add item: $e';
@@ -147,7 +124,7 @@ class MenuProvider with ChangeNotifier {
 
   Future<void> updateMenuItem(MenuItem item) async {
     try {
-      await _firestore.collection('menu').doc(item.id).update(item.toMap());
+      await _client.from('menu').update(item.toMap()).eq('id', item.id);
       await fetchMenu();
     } catch (e) {
       _error = 'Failed to update item: $e';
@@ -157,16 +134,13 @@ class MenuProvider with ChangeNotifier {
 
   Future<void> deleteMenuItem(MenuItem item) async {
     try {
-      // Delete the Firestore document first
-      await _firestore.collection('menu').doc(item.id).delete();
-      // Delete the image from Firebase Storage if imageUrl is present
-      if (item.imageUrl.isNotEmpty) {
+      await _client.from('menu').delete().eq('id', item.id);
+      if (item.imageurl.isNotEmpty) {
         try {
-          final ref = _storage.refFromURL(item.imageUrl);
-          await ref.delete();
+          final fileName = item.imageurl.split('/').last;
+          await _client.storage.from('menu-images').remove([fileName]);
         } catch (e) {
           debugPrint('Failed to delete image from storage: $e');
-          // Optionally handle/log error, but do not stop the process
         }
       }
       await fetchMenu();
@@ -177,39 +151,22 @@ class MenuProvider with ChangeNotifier {
   }
 }
 
-/// Helper function to pick and upload an image, works for both web and mobile/desktop.
-/// Call this from your dialog/widget and use the returned imageUrl as needed.
-///
-/// Example usage in your dialog:
-/// ElevatedButton(
-///   onPressed: () async {
-///     await pickAndUploadImage(context, (imageUrl) {
-///       // Use imageUrl in your form/controller
-///     });
-///   },
-///   child: Text('Pick Image'),
-/// )
 Future<void> pickAndUploadImage(
-    BuildContext context, Function(String) onImageUrl) async {
+    BuildContext context, Function(String) onImageurl) async {
   final picker = ImagePicker();
   final picked = await picker.pickImage(source: ImageSource.gallery);
-
   if (picked == null) return;
-
-  dynamic fileOrXFile = picked; // Always pass XFile
-
+  dynamic fileOrXFile = picked;
   final menuProvider = Provider.of<MenuProvider>(context, listen: false);
-
-  final imageUrl =
+  final imageurl =
       await menuProvider.uploadImage(fileOrXFile, onProgress: (progress) {
     // Optionally update a progress indicator here
   });
-
-  if (imageUrl != null && !imageUrl.startsWith('Image must be')) {
-    onImageUrl(imageUrl); // Use the imageUrl in your dialog/form
+  if (imageurl != null && !imageurl.startsWith('Image must be')) {
+    onImageurl(imageurl);
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(imageUrl ?? 'Image upload failed')),
+      SnackBar(content: Text(imageurl ?? 'Image upload failed')),
     );
   }
 }

@@ -75,10 +75,10 @@ class _MenuItemCardState extends State<MenuItemCard>
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: (widget.item.imageUrl != null &&
-                              widget.item.imageUrl!.isNotEmpty)
+                      child: (widget.item.imageurl != null &&
+                              widget.item.imageurl!.isNotEmpty)
                           ? Image.network(
-                              widget.item.imageUrl!,
+                              widget.item.imageurl!,
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,

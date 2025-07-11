@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'presentation/routes/app_router.dart';
 import 'dependency_injection.dart' as di;
 import 'package:provider/provider.dart';
@@ -9,10 +8,12 @@ import 'presentation/home/controllers/home_menu_controller.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  await Supabase.initialize(
+    url: 'https://nsqisssjauoycsxzounm.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zcWlzc3NqYXVveWNzeHpvdW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyMjE4MzQsImV4cCI6MjA2Nzc5NzgzNH0.Y3TzKEu3t5xYiCMW7rPhI4Ol1cj-xsXogLfQyND1hDs',
   );
   di.init();
   runApp(DevicePreview(
