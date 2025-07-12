@@ -57,30 +57,30 @@ class _MenuItemCardState extends State<MenuItemCard>
         child: AnimatedPhysicalModel(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-          elevation: _hovering ? 8 : 2,
+          elevation: _hovering ? 10 : 3,
           color: Colors.white,
-          shadowColor: Colors.black,
-          borderRadius: BorderRadius.circular(10.0),
+          shadowColor: Colors.black.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(16.0),
           shape: BoxShape.rectangle,
           child: FadeTransition(
             opacity: _opacityAnimation,
             child: SlideTransition(
               position: _offsetAnimation,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 12.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(12.0),
                       child: (widget.item.imageurl != null &&
                               widget.item.imageurl!.isNotEmpty)
                           ? Image.network(
                               widget.item.imageurl!,
-                              width: 80,
-                              height: 80,
+                              width: 90,
+                              height: 90,
                               fit: BoxFit.cover,
                               loadingBuilder: (BuildContext context,
                                   Widget child,
@@ -89,8 +89,8 @@ class _MenuItemCardState extends State<MenuItemCard>
                                   return child;
                                 }
                                 return SizedBox(
-                                  width: 80,
-                                  height: 80,
+                                  width: 90,
+                                  height: 90,
                                   child: Center(
                                     child: CircularProgressIndicator(
                                       value:
@@ -107,54 +107,64 @@ class _MenuItemCardState extends State<MenuItemCard>
                               },
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  width: 80,
-                                  height: 80,
-                                  color: Colors.grey[300],
+                                  width: 90,
+                                  height: 90,
+                                  color: Colors.grey.withOpacity(0.15),
                                   child: Icon(
                                     Icons.image_not_supported,
-                                    color: Colors.grey[600],
-                                    size: 40,
-                                  ),
+                                    color: Colors.grey,
+                                    size: 44,
+                                  ), 
                                 );
                               },
                             )
                           : Container(
-                              width: 80,
-                              height: 80,
-                              color: Colors.grey[300],
+                              width: 90,
+                              height: 90,
+                              color: Colors.grey.withOpacity(0.15),
                               child: Icon(
                                 Icons.fastfood,
-                                color: Colors.grey[600],
-                                size: 40,
+                                color: Colors.grey,
+                                size: 44,
                               ),
                             ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       widget.item.amharic,
                       style: const TextStyle(
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.red,
+                        fontSize: 20,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       widget.item.english,
-                      style:
-                          const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      widget.item.section,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Text(
+                        widget.item.section,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ],
                 ),
