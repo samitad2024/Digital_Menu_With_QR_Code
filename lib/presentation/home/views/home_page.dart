@@ -6,18 +6,141 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/providers/menu_provider.dart';
 import '../../admin/admin_dashboard_page.dart';
 
+// Admin login dialog widget
+class _AdminLoginDialog extends StatefulWidget {
+  @override
+  State<_AdminLoginDialog> createState() => _AdminLoginDialogState();
+}
+
+class _AdminLoginDialogState extends State<_AdminLoginDialog> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  void _login() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    await Future.delayed(const Duration(seconds: 1)); // Simulate network
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (email == "rahma01@gmail.com" && password == "Rahma090909") {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(width: 8),
+              Text("Login successful!"),
+            ],
+          ),
+          backgroundColor: Colors.black87,
+        ),
+      );
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider(
+            create: (_) => MenuProvider(),
+            child: const AdminDashboardPage(),
+          ),
+        ),
+      );
+    } else {
+      setState(() {
+        _error = "Invalid email or password.";
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: const Color.fromARGB(255, 221, 200, 83),
+              child: const Icon(Icons.person, color: Colors.white, size: 32),
+            ),
+            SizedBox(height: 16),
+            Text("Admin Login",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            SizedBox(height: 16),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            SizedBox(height: 12),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: "Password",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
+              ),
+              obscureText: true,
+            ),
+            if (_error != null) ...[
+              SizedBox(height: 10),
+              Text(_error!, style: TextStyle(color: Colors.red)),
+            ],
+            SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 221, 200, 83),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: _loading ? null : _login,
+                child: _loading
+                    ? SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : Text("Login",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final sections = [
-      {'amharic': 'የቤት ስፔሻል', 'english': 'Our Special'},
-      {'amharic': 'ቁርስ', 'english': 'Breakfast'},
-      {'amharic': 'ምሳ ና እራት', 'english': 'Lunch & Dinner'},
-      {'amharic': 'የጾም ምግብ', 'english': 'Vege. & Fasting'},
-      {'amharic': 'መጠጦች', 'english': 'Drinks'},
-      {'amharic': 'በሌሎች', 'english': 'Others'},
+      {'amharic': 'የቤት ስፔሻል', 'english': 'Our Special', 'icon': Icons.star},
+      {'amharic': 'ቁርስ', 'english': 'Breakfast', 'icon': Icons.free_breakfast},
+      {
+        'amharic': 'ምሳ ና እራት',
+        'english': 'Lunch & Dinner',
+        'icon': Icons.restaurant_menu
+      },
+      {'amharic': 'የጾም ምግብ', 'english': 'Vege. & Fasting', 'icon': Icons.eco},
+      {'amharic': 'መጠጦች', 'english': 'Drinks', 'icon': Icons.local_drink},
+      {'amharic': 'በሌሎች', 'english': 'Others', 'icon': Icons.more_horiz},
     ];
     return Scaffold(
       backgroundColor: const Color(0xFFFDF1E2),
@@ -26,161 +149,135 @@ class HomePage extends StatelessWidget {
           children: [
             // Blurred background image
             Positioned.fill(
-              child: SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height,
-                    child: ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                        child: Image.asset(
-                          'asset/images/cover.png',
-                          fit: BoxFit.cover,
-                        ),
+              child: Stack(
+                children: [
+                  ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                          sigmaX: 24, sigmaY: 24), // Increased blur
+                      child: Image.asset(
+                        'asset/images/cover.png',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
                       ),
                     ),
                   ),
-                ),
+                  Container(
+                    color: Colors.black
+                        .withOpacity(0.35), // Dark overlay for contrast
+                  ),
+                ],
               ),
             ),
             // Main content
-            Align(
-              alignment: Alignment.topCenter,
+            SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.only(top: 32.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Main card
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          elevation: 4,
-                          color: const Color(0xFFFDF1E2)
-                              .withOpacity(0.2), // 90% transparent
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 18),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Rahma Restaurant',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF179C5B),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  'Authentic Ethiopian Cuisine',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.brown,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                // Rating row
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.star,
-                                        color: Colors.amber[700], size: 20),
-                                    Icon(Icons.star,
-                                        color: Colors.amber[700], size: 20),
-                                    Icon(Icons.star,
-                                        color: Colors.amber[700], size: 20),
-                                    Icon(Icons.star,
-                                        color: Colors.amber[700], size: 20),
-                                    Icon(Icons.star_half,
-                                        color: Colors.amber[700], size: 20),
-                                    const SizedBox(width: 6),
-                                    const Text('4.8',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Experience authentic Ethiopian flavors with traditional recipes and spices passed down through generations.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 13, color: Colors.brown),
-                                ),
-                                const SizedBox(height: 18),
-                                const Text(
-                                  'Digital Menu',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.brown,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                // Category buttons grid
-                                GridView.count(
-                                  crossAxisCount: 2,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  mainAxisSpacing: 14,
-                                  crossAxisSpacing: 14,
-                                  childAspectRatio: 1.2,
-                                  children: sections.map((section) {
-                                    return _MenuCategoryCard(
-                                      amharic: section['amharic']!,
-                                      english: section['english']!,
-                                      imagePath: '', // No image for section
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => MenuSectionPage(
-                                              section: section['english']!,
-                                              amharic: section['amharic']!,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                                const SizedBox(height: 18),
-                                // Footer
-                                Divider(color: Colors.brown[200]),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.phone,
-                                        color: Colors.brown[400], size: 18),
-                                    const SizedBox(width: 10),
-                                    Icon(Icons.location_on,
-                                        color: Colors.brown[400], size: 18),
-                                    SizedBox(width: 10),
-                                    Icon(Icons.language,
-                                        color: Colors.brown[400], size: 18),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  '© 2024 Rahma Restaurant. All rights reserved.',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.brown),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Rahma Restaurant',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(67, 1, 250, 1),
                       ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Authentic Ethiopian Cuisine',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color.fromRGBO(245, 242, 242, 1),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Rating row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.star, color: Colors.amber[700], size: 20),
+                        Icon(Icons.star, color: Colors.amber[700], size: 20),
+                        Icon(Icons.star, color: Colors.amber[700], size: 20),
+                        Icon(Icons.star, color: Colors.amber[700], size: 20),
+                        Icon(Icons.star_half,
+                            color: Colors.amber[700], size: 20),
+                        const SizedBox(width: 6),
+                        const Text('4.8',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Experience authentic Ethiopian flavors with traditional recipes and spices passed down through generations.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: Color.fromRGBO(248, 247, 247, 1)),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Digital Menu',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 248, 247, 246),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Category buttons grid
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 14,
+                      crossAxisSpacing: 14,
+                      childAspectRatio: 1.2,
+                      children: sections.map((section) {
+                        return _MenuCategoryCard(
+                          amharic: section['amharic'] as String,
+                          english: section['english'] as String,
+                          icon: section['icon'] as IconData,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => MenuSectionPage(
+                                  section: section['english'] as String,
+                                  amharic: section['amharic'] as String,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 18),
+                    // Footer
+                    Divider(color: Colors.brown[200]),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.phone, color: Colors.brown[400], size: 18),
+                        const SizedBox(width: 10),
+                        Icon(Icons.location_on,
+                            color: Colors.brown[400], size: 18),
+                        SizedBox(width: 10),
+                        Icon(Icons.language,
+                            color: Colors.brown[400], size: 18),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '© 2024 Rahma Restaurant. All rights reserved.',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Color.fromRGBO(241, 238, 236, 1)),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -188,31 +285,34 @@ class HomePage extends StatelessWidget {
             Positioned(
               top: 18,
               right: 18,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black.withOpacity(0.7),
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 2,
-                ),
-                icon: const Icon(Icons.admin_panel_settings, size: 18),
-                label: const Text('Admin',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => MenuProvider(),
-                        child: const AdminDashboardPage(),
-                      ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => _AdminLoginDialog(),
+                    );
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                    child:
+                        const Icon(Icons.person, color: Colors.white, size: 28),
+                  ),
+                ),
               ),
             ),
           ],
@@ -226,13 +326,14 @@ class HomePage extends StatelessWidget {
 class _MenuCategoryCard extends StatelessWidget {
   final String amharic;
   final String english;
-  final String imagePath;
+  final IconData icon;
   final VoidCallback? onTap;
-  const _MenuCategoryCard(
-      {required this.amharic,
-      required this.english,
-      required this.imagePath,
-      this.onTap});
+  const _MenuCategoryCard({
+    required this.amharic,
+    required this.english,
+    required this.icon,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -241,26 +342,32 @@ class _MenuCategoryCard extends StatelessWidget {
       onTap: onTap,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 2,
+        elevation: 3,
         color: Colors.brown[50],
         child: Padding(
-          padding: const EdgeInsets.all(3.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Removed image widget
-              const SizedBox(height: 3),
+              Icon(icon, size: 38, color: Colors.brown[400]),
+              const SizedBox(height: 8),
               Text(
                 amharic,
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Colors.brown),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.brown,
+                ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 4),
               Text(
                 english,
-                style: const TextStyle(fontSize: 13, color: Colors.brown),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.brown,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -291,7 +398,7 @@ class MenuSectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF179C5B),
+        backgroundColor: const Color.fromARGB(255, 238, 219, 111),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -430,7 +537,7 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem>
     // Fast 360-degree rotation and back
     _rotationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 3000),
     );
     _rotationAnimation = TweenSequence([
       TweenSequenceItem(
@@ -438,11 +545,11 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem>
             .chain(CurveTween(curve: Curves.easeIn)),
         weight: 50,
       ),
-      TweenSequenceItem(
+      /* TweenSequenceItem(
         tween: Tween<double>(begin: 2 * 3.1415926535, end: 0)
             .chain(CurveTween(curve: Curves.easeOut)),
         weight: 50,
-      ),
+      ),*/
     ]).animate(_rotationController);
   }
 
@@ -529,52 +636,45 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem>
                 child: SlideTransition(
                   position: _textOffset,
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start, // Center text horizontally
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Center text vertically
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         widget.amharic,
                         style: const TextStyle(
                           color: Color(0xFFD32F2F),
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 20,
                         ),
-                        textAlign: TextAlign.center, // Center text
+                        textAlign: TextAlign.left,
                       ),
                       Text(
                         widget.english,
                         style: const TextStyle(
                           color: Color(0xFFD32F2F),
                           fontWeight: FontWeight.w500,
-                          fontSize: 15,
+                          fontSize: 17,
                         ),
-                        textAlign: TextAlign.center, // Center text
+                        textAlign: TextAlign.left,
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center price
-                        children: [
-                          if (widget.price.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: Color(0xFF179C5B),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Text(
-                                '${widget.price} AED',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
+                      const SizedBox(height: 12),
+                      if (widget.price.isNotEmpty)
+                        Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF179C5B),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            '${widget.price} AED',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                        ],
-                      ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

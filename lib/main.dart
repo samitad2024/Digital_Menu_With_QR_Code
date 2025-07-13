@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
           colorScheme: colorScheme,
           useMaterial3: true,
           scaffoldBackgroundColor: accentYellow,
-          appBarTheme: AppBarTheme(
+          appBarTheme: const AppBarTheme(
             backgroundColor: primaryRed,
             foregroundColor: Colors.white,
             elevation: 2,
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
               textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
             backgroundColor: accentGreen,
             foregroundColor: darkBrown,
           ),
@@ -103,13 +103,13 @@ class MyApp extends StatelessWidget {
             fillColor: accentYellow.withOpacity(0.15),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: accentOrange),
+              borderSide: const BorderSide(color: accentOrange),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: primaryRed, width: 2),
+              borderSide: const BorderSide(color: primaryRed, width: 2),
             ),
-            labelStyle: TextStyle(color: darkBrown),
+            labelStyle: const TextStyle(color: darkBrown),
           ),
           textTheme: const TextTheme(
             headlineLarge: TextStyle(
