@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/providers/menu_provider.dart';
+import 'news_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({Key? key}) : super(key: key);
@@ -44,6 +45,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         backgroundColor: const Color(0xFF179C5B),
+        actions: [
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.brown[900],
+            ),
+            icon: const Icon(Icons.newspaper, color: Colors.brown),
+            label: const Text('News+'),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => NewsPage(),
+                ),
+              );
+              setState(() {}); // Refresh after returning from NewsPage
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

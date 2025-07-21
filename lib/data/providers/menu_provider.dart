@@ -137,8 +137,14 @@ class MenuProvider with ChangeNotifier {
       await _client.from('menu').delete().eq('id', item.id);
       if (item.imageurl.isNotEmpty) {
         try {
-          final fileName = item.imageurl.split('/').last;
-          await _client.storage.from('menu-images').remove([fileName]);
+          // Extract the file path from the public URL
+          final uri = Uri.parse(item.imageurl);
+          final segments = uri.pathSegments;
+          final storageIndex = segments.indexOf('object');
+          if (storageIndex != -1 && segments.length > storageIndex + 2) {
+            final filePath = segments.sublist(storageIndex + 2).join('/');
+            await _client.storage.from('menu-images').remove([filePath]);
+          }
         } catch (e) {
           debugPrint('Failed to delete image from storage: $e');
         }
