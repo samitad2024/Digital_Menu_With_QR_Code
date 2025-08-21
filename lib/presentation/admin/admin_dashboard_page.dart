@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/providers/menu_provider.dart';
 import 'news_page.dart';
+import '../common_widgets/qr_generator_widget.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({Key? key}) : super(key: key);
@@ -59,6 +60,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 ),
               );
               setState(() {}); // Refresh after returning from NewsPage
+            },
+          ),
+          // QR Code button - placed next to News+
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.brown[900],
+            ),
+            icon: const Icon(Icons.qr_code, color: Colors.brown),
+            label: const Text('QR'),
+            onPressed: () async {
+              await QrGeneratorWidget.show(context);
             },
           ),
         ],
