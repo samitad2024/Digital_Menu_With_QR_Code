@@ -9,6 +9,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
+import '../../utils/download_helper.dart';
 
 class QrGeneratorWidget {
   // Show modal to enter URL and generate QR
@@ -189,19 +190,20 @@ class QrGeneratorWidget {
     try {
       final bytes = await _generateQrPngBytes(data, 800);
       if (bytes == null) throw Exception('Failed to generate QR bytes');
+      final filename = 'qr_${DateTime.now().millisecondsSinceEpoch}.png';
+      final messenger = ScaffoldMessenger.of(context);
       if (kIsWeb) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-                'On web, right-click the QR image to save or open in new tab.')));
+        // Use JS Blob download on web
+        await downloadBytesAsFile(bytes, filename);
+        messenger
+            .showSnackBar(const SnackBar(content: Text('Download started')));
         return;
       }
       final tempDir = await getTemporaryDirectory();
-      final file = await io.File(
-              '${tempDir.path}/qr_${DateTime.now().millisecondsSinceEpoch}.png')
-          .create();
+      final file = await io.File('${tempDir.path}/$filename').create();
       await file.writeAsBytes(bytes);
       await Share.shareXFiles([XFile(file.path)], text: 'QR code');
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
           const SnackBar(content: Text('Image ready to save or share')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

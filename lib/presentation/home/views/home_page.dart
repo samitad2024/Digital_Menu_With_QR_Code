@@ -342,7 +342,7 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // WhatsApp icon button
+                          // WhatsApp icon button (brand PNG)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: BackdropFilter(
@@ -373,10 +373,14 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(7.0),
+                                    padding: const EdgeInsets.all(6.0),
                                     child: Image.network(
-                                      'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
-                                      color: Colors.green,
+                                      'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (c, e, s) => Icon(
+                                        Icons.chat,
+                                        color: Colors.green,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -384,7 +388,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 18),
-                          // TikTok icon button (PNG instead of SVG)
+                          // TikTok icon button (brand PNG)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: BackdropFilter(
@@ -415,9 +419,14 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(7.0),
+                                    padding: const EdgeInsets.all(6.0),
                                     child: Image.network(
                                       'https://cdn-icons-png.flaticon.com/512/3046/3046122.png',
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (c, e, s) => const Icon(
+                                        Icons.music_note,
+                                        color: Colors.black,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -425,27 +434,48 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 18),
-                          // Map icon button (placeholder)
+                          // Google Maps icon button (opens Maps)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                              child: Container(
-                                width: 38,
-                                height: 38,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.85),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 6,
-                                      offset: Offset(0, 2),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () async {
+                                  // Open Google Maps search for the restaurant
+                                  const mapsUrl =
+                                      'https://www.google.com/maps/search/?api=1&query=Rahma+Restaurant';
+                                  if (await canLaunchUrl(Uri.parse(mapsUrl))) {
+                                    await launchUrl(Uri.parse(mapsUrl),
+                                        mode: LaunchMode.externalApplication);
+                                  }
+                                },
+                                child: Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 6,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: Image.network(
+                                      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Google_Maps_icon_%282020%29.svg/512px-Google_Maps_icon_%282020%29.svg.png',
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (c, e, s) => const Icon(
+                                        Icons.location_on,
+                                        color: Color.fromARGB(255, 16, 76, 126),
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                                child: Icon(Icons.map,
-                                    color: Colors.amber, size: 24),
                               ),
                             ),
                           ),
@@ -967,4 +997,3 @@ class _AnimatedMenuItemState extends State<_AnimatedMenuItem>
     );
   }
 }
-
