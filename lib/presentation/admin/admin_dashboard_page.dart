@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/providers/menu_provider.dart';
 import 'news_page.dart';
 import '../common_widgets/qr_generator_widget.dart';
 
-class AdminDashboardPage extends StatefulWidget {
+class AdminDashboardPage extends ConsumerStatefulWidget {
   const AdminDashboardPage({Key? key}) : super(key: key);
 
   @override
-  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
+  ConsumerState<AdminDashboardPage> createState() => _AdminDashboardPageState();
 }
 
-class _AdminDashboardPageState extends State<AdminDashboardPage>
+class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<String> sections = [
@@ -30,7 +30,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
     super.initState();
     _tabController = TabController(length: sections.length, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<MenuProvider>(context, listen: false).fetchMenu();
+      ref.read(menuProviderProvider).fetchMenu();
     });
   }
 
@@ -80,29 +80,28 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           tabs: sections.map((s) => Tab(text: s)).toList(),
         ),
       ),
-      body: Consumer<MenuProvider>(
-        builder: (context, provider, _) {
-          if (provider.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (provider.error != null) {
-            return Center(
-                child: Text(provider.error!,
-                    style: const TextStyle(color: Colors.red)));
-          }
-          return TabBarView(
-            controller: _tabController,
-            children: sections.map((section) {
-              final items = provider.itemsBySection[section] ?? [];
-              return _SectionCRUD(
-                section: section,
-                items: items,
-                provider: provider,
-              );
-            }).toList(),
-          );
-        },
-      ),
+      body: Builder(builder: (context) {
+        final provider = ref.watch(menuProviderProvider);
+        if (provider.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (provider.error != null) {
+          return Center(
+              child: Text(provider.error!,
+                  style: const TextStyle(color: Colors.red)));
+        }
+        return TabBarView(
+          controller: _tabController,
+          children: sections.map((section) {
+            final items = provider.itemsBySection[section] ?? [];
+            return _SectionCRUD(
+              section: section,
+              items: items,
+              provider: provider,
+            );
+          }).toList(),
+        );
+      }),
     );
   }
 }
@@ -286,9 +285,9 @@ class _SectionCRUD extends StatelessWidget {
     final priceController =
         TextEditingController(text: item != null ? item.price.toString() : '');
     final imageurl = item?.imageurl ?? '';
-  XFile? selectedImage;
-  String? errorMsg;
-  double? uploadProgress;
+    XFile? selectedImage;
+    String? errorMsg;
+    double? uploadProgress;
     showDialog(
       context: context,
       builder: (context) {
@@ -313,8 +312,8 @@ class _SectionCRUD extends StatelessWidget {
                       GestureDetector(
                         onTap: () async {
                           final picker = ImagePicker();
-                          final picked =
-                              await picker.pickImage(source: ImageSource.gallery);
+                          final picked = await picker.pickImage(
+                              source: ImageSource.gallery);
                           if (picked != null) {
                             final bytes = await picked.length();
                             if (bytes > 1024 * 1024) {
@@ -347,7 +346,8 @@ class _SectionCRUD extends StatelessWidget {
                                             if (snapshot.connectionState ==
                                                     ConnectionState.done &&
                                                 snapshot.hasData) {
-                                              return Image.memory(snapshot.data!,
+                                              return Image.memory(
+                                                  snapshot.data!,
                                                   fit: BoxFit.cover);
                                             }
                                             return const Center(
@@ -371,8 +371,8 @@ class _SectionCRUD extends StatelessWidget {
                                             Icons.broken_image,
                                             color: Colors.grey,
                                           )),
-                                          loadingBuilder:
-                                              (context, child, loadingProgress) {
+                                          loadingBuilder: (context, child,
+                                              loadingProgress) {
                                             if (loadingProgress == null)
                                               return child;
                                             return const Center(
@@ -433,7 +433,8 @@ class _SectionCRUD extends StatelessWidget {
                   ),
                 ),
               ),
-              actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              actionsPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -468,7 +469,7 @@ class _SectionCRUD extends StatelessWidget {
                           });
                         },
                       );
-                        if (url == null || !url.toString().startsWith('http')) {
+                      if (url == null || !url.toString().startsWith('http')) {
                         setState(() {
                           errorMsg = 'Image upload failed. Please try again.';
                           uploadProgress = null;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'file_helper_io.dart' if (dart.library.html) 'file_helper_web.dart';
 
 class MenuItem {
@@ -21,8 +21,6 @@ class MenuItem {
     required this.section,
     required this.imageurl,
   });
-
-
 
   factory MenuItem.fromMap(Map<String, dynamic> data, String id) {
     return MenuItem(
@@ -159,13 +157,16 @@ class MenuProvider with ChangeNotifier {
   }
 }
 
+final menuProviderProvider =
+    ChangeNotifierProvider<MenuProvider>((ref) => MenuProvider());
+
 Future<void> pickAndUploadImage(
-    BuildContext context, Function(String) onImageurl) async {
+    BuildContext context, WidgetRef ref, Function(String) onImageurl) async {
   final picker = ImagePicker();
   final picked = await picker.pickImage(source: ImageSource.gallery);
   if (picked == null) return;
   dynamic fileOrXFile = picked;
-  final menuProvider = Provider.of<MenuProvider>(context, listen: false);
+  final menuProvider = ref.read(menuProviderProvider);
   final imageurl =
       await menuProvider.uploadImage(fileOrXFile, onProgress: (progress) {
     // Optionally update a progress indicator here

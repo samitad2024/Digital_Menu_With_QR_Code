@@ -1,21 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import '../../../data/providers/menu_provider.dart';
 import '../../../domain/entities/menu_item.dart'
     as entity; // Use alias for entity
 
-class AdminMenuItemFormScreen extends StatefulWidget {
+class AdminMenuItemFormScreen extends ConsumerStatefulWidget {
   const AdminMenuItemFormScreen({Key? key}) : super(key: key);
 
   @override
-  State<AdminMenuItemFormScreen> createState() =>
+  ConsumerState<AdminMenuItemFormScreen> createState() =>
       _AdminMenuItemFormScreenState();
 }
 
-class _AdminMenuItemFormScreenState extends State<AdminMenuItemFormScreen> {
+class _AdminMenuItemFormScreenState
+    extends ConsumerState<AdminMenuItemFormScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _amharic, _english, _imageurl, _uploadError;
   double? _price;
@@ -108,7 +109,7 @@ class _AdminMenuItemFormScreenState extends State<AdminMenuItemFormScreen> {
 
     _formKey.currentState?.save(); // Save form fields if image is present
 
-    final menuProvider = Provider.of<MenuProvider>(context, listen: false);
+    final menuProvider = ref.read(menuProviderProvider);
 
     if (_isDuplicate(menuProvider)) {
       setState(() {
@@ -176,7 +177,7 @@ class _AdminMenuItemFormScreenState extends State<AdminMenuItemFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final menuProvider = Provider.of<MenuProvider>(context);
+    final menuProvider = ref.watch(menuProviderProvider);
     // If you ever initialize _price from a MenuItem, use priceToString(item.price)
     // Example: _price = priceToString(item.price);
     return Center(

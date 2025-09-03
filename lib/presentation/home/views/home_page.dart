@@ -1,22 +1,23 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:provider/provider.dart';
-import '../../../data/providers/menu_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import removed after Riverpod migration
 import '../../admin/admin_dashboard_page.dart';
 import 'package:flutter/widgets.dart'; // Added this import for ValueKey and SizedBox
 import 'package:confetti/confetti.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // HomePage main widget for routing
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  @override
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   // You can add your previous HomePage state and build method here
   late ConfettiController _confettiController;
 
@@ -554,10 +555,7 @@ class _AdminLoginDialogState extends State<_AdminLoginDialog> {
       );
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-            create: (_) => MenuProvider(),
-            child: const AdminDashboardPage(),
-          ),
+          builder: (context) => const AdminDashboardPage(),
         ),
       );
     } else {
